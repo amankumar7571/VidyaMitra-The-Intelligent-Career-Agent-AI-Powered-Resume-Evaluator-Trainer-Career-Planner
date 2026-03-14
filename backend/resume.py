@@ -1,18 +1,24 @@
 import os
 import shutil
+from pathlib import Path
+from uuid import uuid4
+
 import pdfplumber
 import docx
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
+
 import models
+from config import get_settings
 from database import get_db
 from auth import get_current_user
 from nlp_service import extract_skills_from_text
 
 router = APIRouter()
 
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+settings = get_settings()
+UPLOAD_DIR = settings.upload_dir
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 def extract_text_from_pdf(file_path: str) -> str:
     text = ""
@@ -34,26 +40,30 @@ def upload_resume(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    if not file.filename.endswith(('.pdf', '.docx')):
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file name provided.")
+
+    safe_name = Path(file.filename).name
+    if not safe_name.lower().endswith((".pdf", ".docx")):
         raise HTTPException(status_code=400, detail="Only PDF or DOCX files are allowed.")
-        
-    file_path = os.path.join(UPLOAD_DIR, f"{current_user.user_id}_{file.filename}")
-    
+
+    file_path = UPLOAD_DIR / f"{current_user.user_id}_{uuid4().hex}_{safe_name}"
+
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-        
+
     extracted_text = ""
     try:
-        if file.filename.endswith('.pdf'):
-            extracted_text = extract_text_from_pdf(file_path)
-        elif file.filename.endswith('.docx'):
-            extracted_text = extract_text_from_docx(file_path)
+        if safe_name.lower().endswith(".pdf"):
+            extracted_text = extract_text_from_pdf(str(file_path))
+        elif safe_name.lower().endswith(".docx"):
+            extracted_text = extract_text_from_docx(str(file_path))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error parsing file: {str(e)}")
         
     new_resume = models.Resume(
         user_id=current_user.user_id,
-        file_path=file_path,
+        file_path=str(file_path),
         parsed_text=extracted_text
     )
     

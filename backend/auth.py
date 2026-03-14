@@ -8,11 +8,13 @@ from sqlalchemy.orm import Session
 
 import models
 import schemas
+from config import get_settings
 from database import get_db
 
-SECRET_KEY = "super-secret-key-for-career-guidance-ai-system"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 1 week
+settings = get_settings()
+SECRET_KEY = settings.jwt_secret_key
+ALGORITHM = settings.jwt_algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")

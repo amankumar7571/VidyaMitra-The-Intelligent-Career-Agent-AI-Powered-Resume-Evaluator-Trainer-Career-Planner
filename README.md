@@ -68,6 +68,36 @@ App will be available at: **http://localhost:5173**
 
 ---
 
+## Deployment
+
+Recommended production setup:
+
+- Deploy `frontend/` to Vercel
+- Deploy `backend/` to Render
+
+### Vercel
+
+- Root Directory: `frontend`
+- Framework Preset: `Vite`
+- Build Command: `npm run build`
+- Output Directory: `dist`
+- Environment Variable: `VITE_API_BASE_URL=https://your-backend-service.onrender.com`
+
+### Render
+
+- Root Directory: `backend`
+- Build Command: `pip install -r requirements.txt`
+- Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- Environment Variables:
+  - `JWT_SECRET_KEY`
+  - `DATABASE_URL`
+  - `CORS_ALLOW_ORIGINS=https://your-frontend-domain.vercel.app`
+  - `GEMINI_API_KEY` (optional)
+
+Example env files are included in `backend/.env.example` and `frontend/.env.example`.
+
+---
+
 ## Project Structure
 
 ```

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import axios from "axios"
+import api from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -27,7 +27,7 @@ export default function Login() {
       params.append('username', formData.email);
       params.append('password', formData.password);
 
-      const response = await axios.post('/api/auth/login', params, {
+      const response = await api.post('/api/auth/login', params, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
       

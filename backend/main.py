@@ -2,12 +2,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import models
+from config import get_settings
 from database import engine
 import auth
 import user_profile
 import resume
 import prediction
 import roadmap
+
+settings = get_settings()
 
 # Create all tables in sqlite directly for local testing without migrations (for now).
 models.Base.metadata.create_all(bind=engine)
@@ -16,7 +19,7 @@ app = FastAPI(title="AI Career Guidance API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

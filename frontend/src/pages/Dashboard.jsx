@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '@/lib/api';
 import { Sparkles, LogOut, CheckCircle2, TrendingUp, Cpu, Map as MapIcon, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -44,7 +44,7 @@ export default function Dashboard() {
         navigate('/login');
         return;
       }
-      const response = await axios.get('/api/auth/me', {
+      const response = await api.get('/api/auth/me', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(response.data);
@@ -62,7 +62,7 @@ export default function Dashboard() {
   const handleUpdateProfile = async (profileData) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.put('/api/profile/update', profileData, {
+      const response = await api.put('/api/profile/update', profileData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(response.data);
@@ -93,7 +93,7 @@ export default function Dashboard() {
     uploadForm.append('file', file);
 
     try {
-      const response = await axios.post('/api/resume/upload', uploadForm, {
+      const response = await api.post('/api/resume/upload', uploadForm, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -114,7 +114,7 @@ export default function Dashboard() {
     setRoadmap(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('/api/prediction/predict', extractedSkills, {
+      const response = await api.post('/api/prediction/predict', extractedSkills, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPredictionResult(response.data);
@@ -134,7 +134,7 @@ export default function Dashboard() {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(
+      const response = await api.post(
         `/api/roadmap/generate?predicted_role=${encodeURIComponent(roleToGenerate)}`,
         extractedSkills,
         {
